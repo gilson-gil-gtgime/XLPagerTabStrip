@@ -119,6 +119,7 @@ open class ButtonBarPagerTabStripViewController: PagerTabStripViewController, Pa
             }()
         buttonBarView = buttonBarViewAux
         
+        automaticallyAdjustsScrollViewInsets = false
         if buttonBarView.superview == nil {
             view.addSubview(buttonBarView)
         }
@@ -159,6 +160,7 @@ open class ButtonBarPagerTabStripViewController: PagerTabStripViewController, Pa
     open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
+        adjustBarButtonFrame()
         guard isViewAppearing || isViewRotating else { return }
         
         // Force the UICollectionViewFlowLayout to get laid out again with the new size if
@@ -232,6 +234,20 @@ open class ButtonBarPagerTabStripViewController: PagerTabStripViewController, Pa
         }
     }
     
+    // MARK: - Private Methods
+    func adjustBarButtonFrame() {
+        guard topLayoutGuide.length != buttonBarView.frame.origin.y else {
+            return
+        }
+      
+        let buttonBarHeight = self.settings.style.buttonBarHeight ?? 44
+        buttonBarView.frame = CGRect(x: 0, y: topLayoutGuide.length, width: self.view.frame.size.width, height: buttonBarHeight)
+        var newContainerViewFrame = self.containerView.frame
+        newContainerViewFrame.origin.y = buttonBarView.frame.origin.y + buttonBarHeight
+        newContainerViewFrame.size.height = self.containerView.frame.size.height - (buttonBarView.frame.origin.y + buttonBarHeight - self.containerView.frame.origin.y)
+        self.containerView.frame = newContainerViewFrame
+    }
+  
     // MARK: - UICollectionViewDelegateFlowLayut
     
     open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: IndexPath) -> CGSize {
